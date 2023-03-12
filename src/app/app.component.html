@@ -1,0 +1,120 @@
+<mat-drawer-container class="example-container">
+  <mat-drawer mode="side" opened class="sidebar">
+    <h2>Configuration</h2>
+    <form class="settings">
+      <mat-form-field>
+        <mat-select placeholder="Layout" [ngModel]="layout" (ngModelChange)="setLayout($event)" name="layout">
+          <mat-option *ngFor="let l of layouts"  [value]="l.value">
+            {{l.label}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-select placeholder="Line Curve Interpolation" [ngModel]="curveType" (ngModelChange)="setInterpolationType($event)" name="curve">
+          <mat-option *ngFor="let curveType of interpolationTypes"  [value]="curveType">
+            {{curveType}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-checkbox [(ngModel)]="draggingEnabled" name="draggingEnabled">Enable Dragging</mat-checkbox>
+      <mat-checkbox [(ngModel)]="panningEnabled" name="panningEnabled">Enable Panning</mat-checkbox>
+      <mat-checkbox [(ngModel)]="zoomEnabled" name="zoonEnabled">Enable Zoom</mat-checkbox>
+
+      <mat-form-field>
+        <input matInput type="number" [(ngModel)]="zoomSpeed" name="zoomSpeed" placeholder="Zoom speed" step="0.1">
+      </mat-form-field>
+
+      <mat-form-field>
+        <input matInput type="number" [(ngModel)]="minZoomLevel" name="minZoomLevel" placeholder="Min Zoom Level" min="0" [max]="maxZoomLevel" step="0.1">
+      </mat-form-field>
+
+      <mat-form-field>
+        <input matInput type="number" [(ngModel)]="maxZoomLevel" name="maxZoomLevel" placeholder="Max Zoom Level" [min]="minZoomLevel" step="0.1">
+      </mat-form-field>
+
+      <mat-checkbox [(ngModel)]="panOnZoom" name="panOnZoom">Pan while zooming</mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="autoZoom" name="autoZoom">Auto Zoom </mat-checkbox>
+
+      <mat-checkbox [(ngModel)]="autoCenter" name="autoCenter">Auto Center </mat-checkbox>
+    </form>
+
+    <button mat-stroked-button color="primary" class="button" (click)="update$.next(true)">Update</button>
+    <button mat-stroked-button color="primary" class="button" (click)="center$.next(true)">Center</button>
+    <button mat-stroked-button color="primary" class="button" (click)="zoomToFit$.next(true)">Zoom to fit</button>
+  </mat-drawer>
+  
+  <mat-drawer-content>
+    <div class="page">
+      <ngx-graph
+        [links]="links"
+        [nodes]="nodes"
+        [clusters]="clusters"
+        [layout]="layout"
+        [curve]="curve"
+        [draggingEnabled]="draggingEnabled"
+        [panningEnabled]="panningEnabled"
+        [enableZoom]="zoomEnabled"
+        [zoomSpeed]="zoomSpeed"
+        [minZoomLevel]="minZoomLevel"
+        [maxZoomLevel]="maxZoomLevel"
+        [panOnZoom]="panOnZoom"
+        [autoZoom]="autoZoom"
+        [autoCenter]="autoCenter"
+        [update$]="update$"
+        [center$]="center$"
+        [zoomToFit$]="zoomToFit$"
+      >
+
+        <ng-template #defsTemplate>
+          <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+            <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+          </svg:marker>
+        </ng-template>
+
+        <ng-template #clusterTemplate let-cluster>
+          <svg:g class="node cluster">
+            <svg:rect rx="5" ry="5" [attr.width]="cluster.dimension.width" [attr.height]="cluster.dimension.height" [attr.fill]="cluster.data.color" />
+          </svg:g>
+        </ng-template>
+
+        <ng-template #nodeTemplate let-node>
+          <svg:g class="node">
+            <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.color" />
+            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">{{node.label}}</svg:text>
+          </svg:g>
+        </ng-template>
+
+        <ng-template #linkTemplate let-link>
+          <svg:g class="edge">
+            <svg:path class="line" stroke-width="2" marker-end="url(#arrow)">
+            </svg:path>
+            <svg:text class="edge-label" text-anchor="middle">
+              <textPath class="text-path" [attr.href]="'#' + link.id" [style.dominant-baseline]="link.dominantBaseline" startOffset="50%">
+                {{link.label}}
+              </textPath>
+            </svg:text>
+          </svg:g>
+
+          <svg:g
+            *ngIf="link.midPoint"
+            [attr.transform]="'translate(' + (link.midPoint.x - 14) + ',' + (link.midPoint.y - 7) + ')'"
+          >
+            <svg:circle class="indicator-background" r="5" cx="6" cy="7"></svg:circle>
+            <svg:path
+              class="condition-indicator"
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M6.94444 0C3.10913 0 0 3.10913 0 6.94444C0 10.7798 3.10913 13.8889 6.94444 13.8889H18.0556C21.8909 13.8889 25 10.7798 25 6.94444C25 3.10913 21.8909 0 18.0556 0H6.94444ZM6.25015 11.1108C8.55134 11.1108 10.4168 9.24533 10.4168 6.94414C10.4168 4.64296 8.55134 2.77748 6.25015 2.77748C3.94896 2.77748 2.08348 4.64296 2.08348 6.94414C2.08348 9.24533 3.94896 11.1108 6.25015 11.1108Z"
+            />
+          </svg:g>
+        </ng-template>
+      </ngx-graph>
+    </div>
+    
+  </mat-drawer-content>
+</mat-drawer-container>
+
+
